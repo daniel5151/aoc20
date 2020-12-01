@@ -5,19 +5,17 @@ macro_rules! munge_input {
         let input = &$input;
         input
             .split('\n')
-            .map(|s| s.parse::<usize>().unwrap())
-            .collect::<Vec<_>>()
+            .map(|s| s.parse::<usize>())
+            .collect::<Result<Vec<_>, _>>()?
     }};
 }
 
 pub fn q1(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
 
-    let mut m = HashSet::new();
-    for n in input {
-        m.insert(n);
-        if m.contains(&(2020 - n)) {
-            return Ok(n * (2020 - n));
+    for v in input.into_iter().combinations(2) {
+        if v[0] + v[1] == 2020 {
+            return Ok(v[0] * v[1]);
         }
     }
 
@@ -27,14 +25,9 @@ pub fn q1(input: &str, _args: &[&str]) -> DynResult<usize> {
 pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
 
-    let mut m: HashMap<usize, (usize, usize)> = HashMap::new();
-    for n1 in input.iter().copied() {
-        for n2 in input.iter().copied() {
-            m.insert(n1 + n2, (n1, n2));
-            if m.contains_key(&(2020 - n2)) {
-                let (m1, m2) = m.get(&(2020 - n2)).unwrap();
-                return Ok(n2 * m1 * m2);
-            }
+    for v in input.into_iter().combinations(3) {
+        if v[0] + v[1] + v[2] == 2020 {
+            return Ok(v[0] * v[1] * v[2]);
         }
     }
 
