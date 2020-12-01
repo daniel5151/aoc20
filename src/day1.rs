@@ -10,28 +10,23 @@ macro_rules! munge_input {
     }};
 }
 
-pub fn q1(input: &str, _args: &[&str]) -> DynResult<usize> {
-    let input = munge_input!(input);
-
-    for v in input.into_iter().combinations(2) {
-        if v[0] + v[1] == 2020 {
-            return Ok(v[0] * v[1]);
+fn find(nums: impl Iterator<Item = usize>, group_size: usize, sum: usize) -> Option<usize> {
+    for v in nums.combinations(group_size) {
+        if v.iter().sum::<usize>() == sum {
+            return Some(v.iter().product());
         }
     }
+    None
+}
 
-    Err("invalid input".into())
+pub fn q1(input: &str, _args: &[&str]) -> DynResult<usize> {
+    let input = munge_input!(input);
+    find(input.into_iter(), 2, 2020).ok_or_else(|| "invalid input".into())
 }
 
 pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
-
-    for v in input.into_iter().combinations(3) {
-        if v[0] + v[1] + v[2] == 2020 {
-            return Ok(v[0] * v[1] * v[2]);
-        }
-    }
-
-    Err("invalid input".into())
+    find(input.into_iter(), 3, 2020).ok_or_else(|| "invalid input".into())
 }
 
 #[cfg(test)]
