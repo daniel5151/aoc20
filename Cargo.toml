@@ -1,0 +1,18 @@
+[package]
+name = "aoc20"
+version = "0.1.0"
+authors = ["Daniel Prilik <danielprilik@gmail.com>"]
+edition = "2018"
+
+[features]
+default = []
+
+[dependencies]
+itertools = "0.8"
+
+[profile.dev]
+codegen-units = 4
+incremental = true
+lto = false
+opt-level = 1
+panic = 'unwind'
