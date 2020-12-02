@@ -3,59 +3,51 @@ use crate::prelude::*;
 macro_rules! munge_input {
     ($input:ident) => {{
         let input = &$input;
-        let mut v = Vec::new();
-        for ln in input.split('\n') {
-            let mut l = ln.split(' ');
-            let mut nums = l.next().unwrap().split('-');
-            let min = nums.next().unwrap();
-            let max = nums.next().unwrap();
-            let c = l.next().unwrap().chars().next().unwrap();
-            let pass = l.next().unwrap();
-            v.push((
-                (min.parse::<usize>()?, max.parse::<usize>()?),
-                c,
-                pass.to_string(),
-            ))
-        }
-        v
+
+        input
+            .split('\n')
+            .map(|ln| -> Option<_> {
+                let mut ln = ln.split(' ');
+                let mut range = ln.next()?.split('-');
+                let min = range.next()?.parse::<usize>().ok()?;
+                let max = range.next()?.parse::<usize>().ok()?;
+                let c = ln.next()?.chars().next()?;
+                let pass = ln.next()?;
+                Some(((min, max), c, pass.to_owned()))
+            })
+            .collect::<Option<Vec<_>>>()
+            .ok_or("invalid input")?
     }};
 }
 
 pub fn q1(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
 
-    let mut total = 0;
-    for ((min, max), c, pass) in input {
-        let count = pass.chars().filter(|c2| *c2 == c).count();
-        if count >= min && count <= max {
-            total += 1;
-        }
-    }
+    let valid = input
+        .into_iter()
+        .filter(|((min, max), c, pass)| {
+            (min..=max).contains(&&pass.chars().filter(|pc| pc == c).count())
+        })
+        .count();
 
-    Ok(total)
+    Ok(valid)
 }
 
 pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
 
-    let mut total = 0;
-    'outer: for ((min, max), c, pass) in input {
-        let pass = pass.as_bytes();
-        let mut n = 0;
-        for i in &[min, max] {
-            if pass[i - 1] == c as u8 {
-                n += 1;
-            }
-            if n > 1 {
-                continue 'outer;
-            }
-        }
-        if n == 1 {
-            total += 1;
-        }
-    }
+    let valid = input
+        .into_iter()
+        .filter(|((a, b), c, pass)| {
+            let (a, b) = (a - 1, b - 1);
+            let c = *c as u8;
+            let pass = pass.as_bytes();
 
-    Ok(total)
+            (pass[a] == c || pass[b] == c) && pass[a] != pass[b]
+        })
+        .count();
+
+    Ok(valid)
 }
 
 #[cfg(test)]
