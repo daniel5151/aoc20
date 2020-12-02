@@ -86,6 +86,7 @@ macro_rules! days {
 
 days! {
     day1,
+    day2,
 }
 
 fn main() -> DynResult<()> {

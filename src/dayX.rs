@@ -7,20 +7,20 @@ macro_rules! munge_input {
     }};
 }
 
-pub fn q1(input: &str, _args: &[&str]) -> DynResult<()> {
+pub fn q1(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
 
     let _ = input;
 
-    Ok(())
+    Ok(0)
 }
 
-pub fn q2(input: &str, _args: &[&str]) -> DynResult<()> {
+pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
 
     let _ = input;
 
-    Ok(())
+    Ok(0)
 }
 
 #[cfg(test)]
@@ -31,6 +31,6 @@ mod tests {
     fn q1_e1() {
         let input = "...";
         let output = q1(input, &[]);
-        assert_eq!(output.unwrap(), ());
+        assert_eq!(output.unwrap(), 0);
     }
 }
