@@ -2,10 +2,10 @@
 #![allow(clippy::type_complexity)]
 
 /// Catch-all error type (works with anything that implements std::error::Error)
-pub type DynResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+pub type DynResult<T> = Result<T, Box<dyn std::error::Error>>;
 
 pub mod prelude {
-    // useful stdlib stuff
+    // useful std stuff
     pub use std::collections::*;
     pub use std::io::prelude::*;
 
@@ -62,7 +62,7 @@ pub mod prelude {
     }
 }
 
-// Utulity macro to make adding new days a breeze
+// Utility macro to make adding new days a breeze
 macro_rules! days {
     ($($day:ident),* $(,)*) => {
         $(mod $day;)*
@@ -91,7 +91,7 @@ days! {
 
 fn main() -> DynResult<()> {
     let args = std::env::args().collect::<Vec<String>>();
-    let args = args.iter().map(|s| s.as_str()).collect::<Vec<&str>>();
+    let args = args.iter().map(String::as_str).collect::<Vec<&str>>();
 
     let (day, question) = match (args.get(1), args.get(2)) {
         (None, _) | (_, None) => return Err("Must specify day and question (e.g: 3 1)".into()),

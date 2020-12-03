@@ -2,8 +2,7 @@ use crate::prelude::*;
 
 macro_rules! munge_input {
     ($input:ident) => {{
-        let input = &$input;
-
+        let input = $input;
         input
             .split('\n')
             .map(|ln| -> Option<_> {
