@@ -33,33 +33,30 @@ pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn q1_e1() {
-        let input = r#"
+    const EXAMPLE_1: &str = "
 1721
 979
 366
 299
 675
 1456
-"#
-        .trim();
-        let output = q1(input, &[]);
-        assert_eq!(output.unwrap(), 514579);
+";
+
+    #[test]
+    fn q1_e1() {
+        let input = EXAMPLE_1;
+        let expected = 514579;
+        let q = q1;
+
+        assert_eq!(q(input.trim(), &[]).unwrap(), expected);
     }
 
     #[test]
     fn q2_e1() {
-        let input = r#"
-1721
-979
-366
-299
-675
-1456
-"#
-        .trim();
-        let output = q2(input, &[]);
-        assert_eq!(output.unwrap(), 241861950);
+        let input = EXAMPLE_1;
+        let expected = 241861950;
+        let q = q2;
+
+        assert_eq!(q(input.trim(), &[]).unwrap(), expected);
     }
 }

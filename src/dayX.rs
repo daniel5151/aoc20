@@ -27,10 +27,26 @@ pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
 mod tests {
     use super::*;
 
+    const EXAMPLE_1: &str = "
+.....dummy.....
+.....input.....
+";
+
     #[test]
     fn q1_e1() {
-        let input = "...";
-        let output = q1(input, &[]);
-        assert_eq!(output.unwrap(), 0);
+        let input = EXAMPLE_1;
+        let expected = 0;
+        let q = q1;
+
+        assert_eq!(q(input.trim(), &[]).unwrap(), expected);
     }
+
+    // #[test]
+    // fn q2_e1() {
+    //     let input = EXAMPLE_1;
+    //     let expected = 0;
+    //     let q = q2;
+
+    //     assert_eq!(q(input.trim(), &[]).unwrap(), expected);
+    // }
 }

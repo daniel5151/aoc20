@@ -35,9 +35,8 @@ pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn q1_e1() {
-        let input = "..##.......
+    const EXAMPLE_1: &str = "
+..##.......
 #...#...#..
 .#....#..#.
 ..#.#...#.#
@@ -47,25 +46,24 @@ mod tests {
 .#........#
 #.##...#...
 #...##....#
-.#..#...#.#";
-        let output = q1(input, &[]);
-        assert_eq!(output.unwrap(), 7);
+.#..#...#.#
+";
+
+    #[test]
+    fn q1_e1() {
+        let input = EXAMPLE_1;
+        let expected = 7;
+        let q = q1;
+
+        assert_eq!(q(input.trim(), &[]).unwrap(), expected);
     }
 
     #[test]
     fn q2_e1() {
-        let input = "..##.......
-#...#...#..
-.#....#..#.
-..#.#...#.#
-.#...##..#.
-..#.##.....
-.#.#.#....#
-.#........#
-#.##...#...
-#...##....#
-.#..#...#.#";
-        let output = q2(input, &[]);
-        assert_eq!(output.unwrap(), 336);
+        let input = EXAMPLE_1;
+        let expected = 336;
+        let q = q2;
+
+        assert_eq!(q(input.trim(), &[]).unwrap(), expected);
     }
 }
