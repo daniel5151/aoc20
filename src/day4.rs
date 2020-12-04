@@ -1,89 +1,76 @@
 use crate::prelude::*;
 
 const REQ_FIELDS: &[&str] = &["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]; //, "cid"];
+const EYE_COLORS: &[&str] = &["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
 
 macro_rules! munge_input {
     ($input:ident) => {{
         let input = $input;
-        input
-            .split("\n\n")
-            .map(|praw| {
-                praw.split('\n')
-                    .flat_map(|ln| ln.split(' '))
-                    .map(|f| {
-                        let mut f = f.split(':');
-                        let k = f.next().unwrap();
-                        let v = f.next().unwrap();
-                        (k, v)
-                    })
-                    .collect::<HashMap<_, _>>()
+        input.split("\n\n").map(|praw| {
+            praw.split('\n').flat_map(|ln| ln.split(' ')).map(|f| {
+                let mut f = f.split(':');
+                let k = f.next()?;
+                let v = f.next()?;
+                Some((k, v))
             })
-            .collect::<Vec<_>>()
+        })
     }};
 }
 
-fn validate<'a>(p: HashMap<&'a str, &'a str>) -> DynResult<()> {
-    for f in REQ_FIELDS {
-        if !p.contains_key(f) {
-            return Err("".into());
-        }
-    }
+trait ClonableIterator: Iterator + Clone {}
+impl<T: Iterator + Clone> ClonableIterator for T {}
 
-    const EYE_COLOR: &[&str] = &["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
+fn validate_req_field<'a>(p: impl ClonableIterator<Item = Option<(&'a str, &'a str)>>) -> bool {
+    let k = p.map(|kv| kv.map(|(k, _v)| k));
+    REQ_FIELDS.iter().all(|f| k.clone().any(|k| k == Some(f)))
+}
 
-    for (k, v) in p {
-        let ok = match k {
-            "byr" => (1920..=2002).contains(&v.parse::<usize>()?),
-            "iyr" => (2010..=2020).contains(&v.parse::<usize>()?),
-            "eyr" => (2020..=2030).contains(&v.parse::<usize>()?),
-            "hgt" => {
-                if let Some(n) = v.strip_suffix("cm") {
-                    (150..=193).contains(&n.parse::<usize>()?)
-                } else if let Some(n) = v.strip_suffix("in") {
-                    (59..=76).contains(&n.parse::<usize>()?)
-                } else {
-                    false
+fn validate<'a>(p: impl Iterator<Item = Option<(&'a str, &'a str)>>) -> bool {
+    fn validate_inner<'a>(p: impl Iterator<Item = Option<(&'a str, &'a str)>>) -> Option<bool> {
+        for kv in p {
+            let (k, v) = kv?;
+            let ok = match k {
+                "byr" => (1920..=2002).contains(&v.parse::<usize>().ok()?),
+                "iyr" => (2010..=2020).contains(&v.parse::<usize>().ok()?),
+                "eyr" => (2020..=2030).contains(&v.parse::<usize>().ok()?),
+                "hgt" => {
+                    if let Some(n) = v.strip_suffix("cm") {
+                        (150..=193).contains(&n.parse::<usize>().ok()?)
+                    } else if let Some(n) = v.strip_suffix("in") {
+                        (59..=76).contains(&n.parse::<usize>().ok()?)
+                    } else {
+                        false
+                    }
                 }
-            }
-            "hcl" => match v.strip_prefix('#') {
-                None => false,
-                Some(v) => v.chars().all(|c| matches!(c, 'a'..='f' | '0'..='9')),
-            },
-            "ecl" => EYE_COLOR.contains(&v),
-            "pid" => v.len() == 9 && v.parse::<usize>().is_ok(),
-            "cid" => true,
-            _ => return Err("".into()),
-        };
+                "hcl" => v.strip_prefix('#')?.chars().all(|c| c.is_ascii_hexdigit()),
+                "ecl" => EYE_COLORS.contains(&v),
+                "pid" => v.len() == 9 && v.parse::<usize>().is_ok(),
+                "cid" => true,
+                _ => false,
+            };
 
-        if !ok {
-            return Err("".into());
+            if !ok {
+                return Some(false);
+            }
         }
+        Some(true)
     }
 
-    Ok(())
+    validate_inner(p).unwrap_or(false)
 }
 
 pub fn q1(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
-
-    eprintln!("{:#?}", input);
-
-    let mut valid = 0;
-    for p in input {
-        valid += validate(p).is_ok() as usize;
-    }
-
+    let valid = input.map(validate_req_field).filter(|p| *p).count();
     Ok(valid)
 }
 
 pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
-
-    let mut valid = 0;
-    for p in input {
-        valid += validate(p).is_ok() as usize;
-    }
-
+    let valid = input
+        .map(|p| validate_req_field(p.clone()) && validate(p))
+        .filter(|p| *p)
+        .count();
     Ok(valid)
 }
 
