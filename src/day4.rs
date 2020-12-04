@@ -6,30 +6,32 @@ const EYE_COLORS: &[&str] = &["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
 macro_rules! munge_input {
     ($input:ident) => {{
         let input = $input;
-        input.split("\n\n").map(|praw| {
-            praw.split('\n').flat_map(|ln| ln.split(' ')).map(|f| {
-                let mut f = f.split(':');
-                let k = f.next()?;
-                let v = f.next()?;
-                Some((k, v))
+        input
+            .split("\n\n")
+            .map(|praw| {
+                praw.split('\n')
+                    .flat_map(|ln| ln.split(' '))
+                    .map(|f| {
+                        let mut f = f.split(':');
+                        let k = f.next()?;
+                        let v = f.next()?;
+                        Some((k, v))
+                    })
+                    .collect::<Option<HashMap<_, _>>>()
             })
-        })
+            .collect::<Option<Vec<_>>>()
+            .ok_or("invalid k/v pair".to_string())?
     }};
 }
 
-trait ClonableIterator: Iterator + Clone {}
-impl<T: Iterator + Clone> ClonableIterator for T {}
-
-fn validate_req_field<'a>(p: impl ClonableIterator<Item = Option<(&'a str, &'a str)>>) -> bool {
-    let k = p.map(|kv| kv.map(|(k, _v)| k));
-    REQ_FIELDS.iter().all(|f| k.clone().any(|k| k == Some(f)))
+fn validate_req_field<'a>(p: &HashMap<&'a str, &'a str>) -> bool {
+    REQ_FIELDS.iter().all(|f| p.contains_key(f))
 }
 
-fn validate<'a>(p: impl Iterator<Item = Option<(&'a str, &'a str)>>) -> bool {
-    fn validate_inner<'a>(p: impl Iterator<Item = Option<(&'a str, &'a str)>>) -> Option<bool> {
-        for kv in p {
-            let (k, v) = kv?;
-            let ok = match k {
+fn validate_values<'a>(p: &HashMap<&'a str, &'a str>) -> bool {
+    fn validate_values_inner<'a>(p: &HashMap<&'a str, &'a str>) -> Option<bool> {
+        for (k, v) in p {
+            let ok = match *k {
                 "byr" => (1920..=2002).contains(&v.parse::<usize>().ok()?),
                 "iyr" => (2010..=2020).contains(&v.parse::<usize>().ok()?),
                 "eyr" => (2020..=2030).contains(&v.parse::<usize>().ok()?),
@@ -56,20 +58,21 @@ fn validate<'a>(p: impl Iterator<Item = Option<(&'a str, &'a str)>>) -> bool {
         Some(true)
     }
 
-    validate_inner(p).unwrap_or(false)
+    validate_values_inner(p).unwrap_or(false)
 }
 
 pub fn q1(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
-    let valid = input.map(validate_req_field).filter(|p| *p).count();
+    let valid = input.into_iter().filter(validate_req_field).count();
     Ok(valid)
 }
 
 pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
     let valid = input
-        .map(|p| validate_req_field(p.clone()) && validate(p))
-        .filter(|p| *p)
+        .into_iter()
+        .filter(validate_req_field)
+        .filter(validate_values)
         .count();
     Ok(valid)
 }
@@ -103,7 +106,7 @@ iyr:2011 ecl:brn hgt:59in
         assert_eq!(q(input.trim(), &[]).unwrap(), expected);
     }
 
-    const EXAMPLE_2: &str = "
+    const EXAMPLE_INVALID: &str = "
 eyr:1972 cid:100
 hcl:#18171d ecl:amb hgt:170 pid:186cm iyr:2018 byr:1926
 
@@ -119,7 +122,7 @@ eyr:2038 hcl:74454a iyr:2023
 pid:3556412378 byr:2007
 ";
 
-    const EXAMPLE_3: &str = "
+    const EXAMPLE_VALID: &str = "
 pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980
 hcl:#623a2f
 
@@ -136,7 +139,7 @@ iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
 
     #[test]
     fn q2_e1() {
-        let input = EXAMPLE_2;
+        let input = EXAMPLE_INVALID;
         let expected = 0;
         let q = q2;
 
@@ -145,7 +148,7 @@ iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
 
     #[test]
     fn q2_e2() {
-        let input = EXAMPLE_3;
+        let input = EXAMPLE_VALID;
         let expected = 4;
         let q = q2;
 
