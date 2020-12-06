@@ -3,16 +3,10 @@ use crate::prelude::*;
 macro_rules! munge_input {
     ($input:ident) => {{
         let input = $input;
-        input
-            .split('\n')
-            .map(|ln| ln.as_bytes().split_at(7))
-            .map(|(row, col)| {
-                (
-                    row.iter().fold(0, |a, c| a << 1 | (*c == b'B') as usize),
-                    col.iter().fold(0, |a, c| a << 1 | (*c == b'R') as usize),
-                )
-            })
-            .map(|(row, col)| row * 8 + col)
+        input.split('\n').map(|ln| {
+            ln.chars()
+                .fold(0, |a, c| a << 1 | matches!(c, 'B' | 'R') as usize)
+        })
     }};
 }
 
