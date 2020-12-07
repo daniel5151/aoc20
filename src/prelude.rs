@@ -56,6 +56,9 @@ pub trait SliceExt<T> {
     /// predicate (the index of the first element of the second
     /// partition).
     fn partition_point_enumerated(&self, pred: impl FnMut(usize, &T) -> bool) -> usize;
+
+    /// Return an iterator over all combinations of size N in the slice.
+    fn combinations_const<const N: usize>(&self) -> CombinationsConst<'_, T, N>;
 }
 
 impl<T, S> SliceExt<T> for S
@@ -87,6 +90,10 @@ where
 
         left
     }
+
+    fn combinations_const<const N: usize>(&self) -> CombinationsConst<'_, T, N> {
+        CombinationsConst::new(self.as_ref())
+    }
 }
 
 /// Useful AOC things
@@ -98,5 +105,52 @@ pub mod aoc {
         let mut s = DefaultHasher::new();
         t.hash(&mut s);
         s.finish()
+    }
+}
+
+pub struct CombinationsConst<'a, T, const N: usize> {
+    arr: &'a [T],
+    idx: [usize; N],
+}
+
+impl<'a, T, const N: usize> CombinationsConst<'a, T, N> {
+    fn new(arr: &'a [T]) -> Self {
+        let mut idx = [0; { N }];
+        for (i, idx) in idx.iter_mut().enumerate() {
+            *idx = i
+        }
+
+        CombinationsConst { arr, idx }
+    }
+}
+
+impl<'a, T, const N: usize> Iterator for CombinationsConst<'a, T, N> {
+    type Item = [&'a T; N];
+
+    // https://stackoverflow.com/questions/5076695/how-can-i-iterate-through-every-possible-combination-of-n-playing-cards
+    fn next(&mut self) -> Option<Self::Item> {
+        if N == 0 || N > self.arr.len() {
+            return None;
+        }
+
+        let mut n = self.arr.len();
+        for i in (0..=(N - 1)).rev() {
+            n -= 1;
+            if self.idx[i] < n {
+                self.idx[i] += 1;
+                for j in (i + 1)..N {
+                    self.idx[j] = self.idx[j - 1] + 1;
+                }
+
+                let mut out = [&self.arr[0]; { N }];
+                for (e, v) in out.iter_mut().zip(self.idx.iter().copied()) {
+                    *e = &self.arr[v]
+                }
+
+                return Some(out);
+            }
+        }
+
+        None
     }
 }

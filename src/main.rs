@@ -1,5 +1,5 @@
-#![allow(clippy::unreadable_literal)]
-#![allow(clippy::type_complexity)]
+#![allow(clippy::unreadable_literal, clippy::type_complexity)]
+#![feature(min_const_generics)]
 
 pub mod prelude;
 

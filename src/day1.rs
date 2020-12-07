@@ -10,10 +10,10 @@ macro_rules! munge_input {
     }};
 }
 
-fn find(nums: impl Iterator<Item = usize>, group_size: usize, sum: usize) -> Option<usize> {
-    for v in nums.combinations(group_size) {
-        if v.iter().sum::<usize>() == sum {
-            return Some(v.iter().product());
+fn find<const GROUP_SIZE: usize>(nums: &[usize], sum: usize) -> Option<usize> {
+    for v in nums.combinations_const::<GROUP_SIZE>() {
+        if v.iter().copied().sum::<usize>() == sum {
+            return Some(v.iter().copied().product());
         }
     }
     None
@@ -21,12 +21,12 @@ fn find(nums: impl Iterator<Item = usize>, group_size: usize, sum: usize) -> Opt
 
 pub fn q1(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
-    find(input.into_iter(), 2, 2020).ok_or_else(|| "invalid input".into())
+    find::<2>(&input, 2020).ok_or_else(|| "invalid input".into())
 }
 
 pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
-    find(input.into_iter(), 3, 2020).ok_or_else(|| "invalid input".into())
+    find::<3>(&input, 2020).ok_or_else(|| "invalid input".into())
 }
 
 #[cfg(test)]
