@@ -12,6 +12,8 @@ pub use itertools::Itertools;
 
 pub use crate::DynResult;
 
+pub use crate::vm;
+
 pub trait GcdLcm {
     /// Find the Greatest Common Divisor between two integers
     fn gcd(self, other: Self) -> Self;
