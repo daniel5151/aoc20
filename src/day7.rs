@@ -4,28 +4,25 @@ macro_rules! munge_input {
     ($input:ident) => {{
         let input = $input;
         input.split('\n').map(|ln| -> Option<_> {
-            let mut s = ln.split(" bags contain ");
-            let mut p = s.next()?.split(' ');
-            let p = (p.next()?, p.next()?);
+            let mut ln = ln.split(" bags contain ");
 
-            let c = s
-                .next()?
-                .strip_suffix('.')?
+            let mut parent_bag = ln.next()?.split(' ');
+            let parent_bag = (parent_bag.next()?, parent_bag.next()?);
+
+            let contents = (ln.next()?)
                 .split(", ")
                 .map(|e| -> Option<_> {
-                    let mut e = e.strip_suffix("bag").or(e.strip_suffix("bags"))?.split(' ');
+                    let mut e = e.split(' ');
                     let n = match e.next()? {
                         "no" => return Some((0, ("", ""))),
                         n => n.parse::<usize>().ok()?,
                     };
-                    let a = e.next()?;
-                    let c = e.next()?;
-                    Some((n, (a, c)))
+                    Some((n, (e.next()?, e.next()?)))
                 })
                 .filter(|e| e.map(|(n, _)| n == 0) != Some(true))
-                .collect::<Option<Vec<(_, _)>>>()?;
+                .collect::<Option<Vec<_>>>()?;
 
-            Some((p, c))
+            Some((parent_bag, contents))
         })
     }};
 }
