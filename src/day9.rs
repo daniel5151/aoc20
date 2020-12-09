@@ -13,8 +13,8 @@ macro_rules! munge_input {
 pub fn first_invalid(nums: &[usize], preamble: usize) -> DynResult<usize> {
     'outer: for g in nums.windows(preamble + 1) {
         let n = *g.last().ok_or("nums cannot be empty")?;
-        for combo in g.iter().copied().combinations(2) {
-            if combo.iter().sum::<usize>() == n {
+        for combo in g.combinations_const::<2>() {
+            if combo.iter().copied().sum::<usize>() == n {
                 continue 'outer;
             }
         }
@@ -42,22 +42,47 @@ pub fn q2(input: &str, args: &[&str]) -> DynResult<usize> {
         None => 25,
     };
 
-    let sum = first_invalid(&input, preamble)?;
-    let max_i = input.iter().position(|e| *e == sum).unwrap();
+    let target_sum = first_invalid(&input, preamble)?;
 
-    for i in 0..max_i {
-        for j in i..max_i {
-            let range = &input[i..=j];
-            if range.iter().sum::<usize>() == sum {
-                match range.iter().minmax() {
-                    MinMaxResult::MinMax(min, max) => return Ok(min + max),
-                    _ => return Err("invalid input".into()),
+    // restrict the input to all elements before the target.
+    //
+    // for maximum efficiency, the index could be calculated as part of
+    // `first_invalid`, but another pass isn't the end of the world...
+    let max_i = input.iter().position(|e| *e == target_sum).unwrap();
+    let input = &input[0..max_i];
+
+    // grows the sum by extending from the right-hand-side of the window, then
+    // shrinks the sum by shrinking from the left-hand-side of the window.
+    let mut sum = input[0] + input[1];
+    let (mut l, mut r) = (0, 2);
+    loop {
+        while sum < target_sum {
+            sum += match input.get(r) {
+                None => return Err("could not find valid span".into()),
+                Some(v) => {
+                    r += 1;
+                    v
                 }
+            };
+        }
+
+        if sum == target_sum {
+            // IMPROVEMENT: keep track of min and max while iterating
+            // in the worst-case, this final iteration results in a full traversal of the
+            // input array
+            let (min, max) = input[l..r].iter().minmax().into_option().unwrap();
+            return Ok(min + max);
+        }
+
+        while sum > target_sum {
+            sum -= input[l];
+            l += 1;
+
+            if l == r {
+                return Err("could not find valid span".into());
             }
         }
     }
-
-    Err("could not find valid span".into())
 }
 
 #[cfg(test)]
