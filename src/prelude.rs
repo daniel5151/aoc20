@@ -8,7 +8,7 @@ pub use std::collections::*;
 pub use std::io::prelude::*;
 
 // useful external libraries
-pub use itertools::Itertools;
+pub use itertools::{Itertools, MinMaxResult};
 
 pub use crate::DynResult;
 
