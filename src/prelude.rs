@@ -113,6 +113,10 @@ pub mod aoc {
 pub struct CombinationsConst<'a, T, const N: usize> {
     arr: &'a [T],
     idx: [usize; N],
+    // HACK: the implementation I used is from C++, which splits retrieving the element and
+    // advancing the iterator. Rust merges the two operations, and being lazy, I've decided to just
+    // work around the problem instead of solving it properly.
+    first: bool,
 }
 
 impl<'a, T, const N: usize> CombinationsConst<'a, T, N> {
@@ -122,7 +126,19 @@ impl<'a, T, const N: usize> CombinationsConst<'a, T, N> {
             *idx = i
         }
 
-        CombinationsConst { arr, idx }
+        CombinationsConst {
+            arr,
+            idx,
+            first: true,
+        }
+    }
+
+    fn output(&mut self) -> [&'a T; N] {
+        let mut out = [&self.arr[0]; { N }];
+        for (e, v) in out.iter_mut().zip(self.idx.iter().copied()) {
+            *e = &self.arr[v]
+        }
+        out
     }
 }
 
@@ -135,6 +151,11 @@ impl<'a, T, const N: usize> Iterator for CombinationsConst<'a, T, N> {
             return None;
         }
 
+        if self.first {
+            self.first = false;
+            return Some(self.output());
+        }
+
         let mut n = self.arr.len();
         for i in (0..=(N - 1)).rev() {
             n -= 1;
@@ -144,15 +165,24 @@ impl<'a, T, const N: usize> Iterator for CombinationsConst<'a, T, N> {
                     self.idx[j] = self.idx[j - 1] + 1;
                 }
 
-                let mut out = [&self.arr[0]; { N }];
-                for (e, v) in out.iter_mut().zip(self.idx.iter().copied()) {
-                    *e = &self.arr[v]
-                }
-
-                return Some(out);
+                return Some(self.output());
             }
         }
 
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn combo_const() {
+        let test = [1, 2, 3];
+        assert_eq!(
+            test.combinations_const().collect::<Vec<_>>(),
+            [[&1, &2], [&1, &3], [&2, &3]]
+        );
     }
 }
