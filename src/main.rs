@@ -1,5 +1,5 @@
 #![allow(clippy::unreadable_literal, clippy::type_complexity)]
-#![feature(min_const_generics)]
+#![feature(min_const_generics, array_value_iter)]
 
 pub mod prelude;
 pub mod vm;

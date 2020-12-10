@@ -173,6 +173,17 @@ impl<'a, T, const N: usize> Iterator for CombinationsConst<'a, T, N> {
     }
 }
 
+/// Workaround until https://github.com/rust-lang/rust/pull/65819 is merged.
+pub trait ArrayIntoIterExt<T, const N: usize> {
+    fn into_iter(self) -> core::array::IntoIter<T, N>;
+}
+
+impl<T, const N: usize> ArrayIntoIterExt<T, N> for [T; N] {
+    fn into_iter(self) -> core::array::IntoIter<T, N> {
+        core::array::IntoIter::new(self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

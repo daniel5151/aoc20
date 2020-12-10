@@ -24,8 +24,8 @@ pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
     let input = munge_input!(input);
     let slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)];
     let total = slopes
-        .iter()
-        .map(|slope| count_trees(input.clone(), *slope))
+        .into_iter()
+        .map(|slope| count_trees(input.clone(), slope))
         .product();
 
     Ok(total)
