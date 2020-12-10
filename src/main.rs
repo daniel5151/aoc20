@@ -1,5 +1,5 @@
 #![allow(clippy::unreadable_literal, clippy::type_complexity)]
-#![feature(min_const_generics, array_value_iter)]
+#![feature(min_const_generics, array_value_iter, array_windows)]
 
 pub mod prelude;
 pub mod vm;
@@ -39,6 +39,7 @@ days! {
     day7,
     day8,
     day9,
+    day10,
 }
 
 fn main() -> DynResult<()> {
