@@ -25,6 +25,7 @@ fn count_stable(
             // eprintln!();
             for (c, seat) in row.iter().enumerate() {
                 // eprint!("{}", *seat as char);
+                next[r][c] = *seat; // copy over state from curr
                 match seat {
                     b'L' => {
                         if visible(&curr, (r, c)) == 0 {
@@ -44,9 +45,7 @@ fn count_stable(
             }
         }
 
-        // why doesn't mem::swap work??
-        // std::mem::swap(&mut curr, &mut next);
-        curr = next.clone();
+        std::mem::swap(&mut curr, &mut next);
 
         if stable {
             break;
