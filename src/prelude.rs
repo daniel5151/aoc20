@@ -8,6 +8,7 @@ pub use std::collections::*;
 pub use std::io::prelude::*;
 
 // useful external libraries
+pub use iter_to_array::*;
 pub use itertools::{Itertools, MinMaxResult};
 
 pub use crate::DynResult;
@@ -114,7 +115,7 @@ pub trait SliceExt<T> {
     fn partition_point_enumerated(&self, pred: impl FnMut(usize, &T) -> bool) -> usize;
 
     /// Return an iterator over all combinations of size N in the slice.
-    fn combinations_const<const N: usize>(&self) -> CombinationsConst<'_, T, N>;
+    fn combinations_const<const N: usize>(&self) -> Combinations<'_, T, N>;
 }
 
 impl<T, S> SliceExt<T> for S
@@ -147,8 +148,8 @@ where
         left
     }
 
-    fn combinations_const<const N: usize>(&self) -> CombinationsConst<'_, T, N> {
-        CombinationsConst::new(self.as_ref())
+    fn combinations_const<const N: usize>(&self) -> Combinations<'_, T, N> {
+        Combinations::new(self.as_ref())
     }
 }
 
@@ -164,7 +165,7 @@ pub mod aoc {
     }
 }
 
-pub struct CombinationsConst<'a, T, const N: usize> {
+pub struct Combinations<'a, T, const N: usize> {
     arr: &'a [T],
     idx: [usize; N],
     // HACK: the implementation I used is from C++, which splits retrieving the element and
@@ -173,14 +174,14 @@ pub struct CombinationsConst<'a, T, const N: usize> {
     first: bool,
 }
 
-impl<'a, T, const N: usize> CombinationsConst<'a, T, N> {
+impl<'a, T, const N: usize> Combinations<'a, T, N> {
     fn new(arr: &'a [T]) -> Self {
         let mut idx = [0; { N }];
         for (i, idx) in idx.iter_mut().enumerate() {
             *idx = i
         }
 
-        CombinationsConst {
+        Combinations {
             arr,
             idx,
             first: true,
@@ -196,7 +197,7 @@ impl<'a, T, const N: usize> CombinationsConst<'a, T, N> {
     }
 }
 
-impl<'a, T, const N: usize> Iterator for CombinationsConst<'a, T, N> {
+impl<'a, T, const N: usize> Iterator for Combinations<'a, T, N> {
     type Item = [&'a T; N];
 
     // https://stackoverflow.com/questions/5076695/how-can-i-iterate-through-every-possible-combination-of-n-playing-cards
@@ -224,6 +225,88 @@ impl<'a, T, const N: usize> Iterator for CombinationsConst<'a, T, N> {
         }
 
         None
+    }
+}
+
+#[derive(Clone)]
+pub struct CartesianProduct<I, const N: usize>
+where
+    I: Iterator,
+{
+    first: bool,
+    base: [I; N],
+    cur_i: [I; N],
+    cur_e: [I::Item; N],
+}
+
+impl<I, const N: usize> CartesianProduct<I, N>
+where
+    I: Iterator + Clone,
+{
+    pub fn new(base: [I; N]) -> CartesianProduct<I, N> {
+        use core::mem::MaybeUninit;
+
+        pub fn uninit_array<T, const N: usize>() -> [MaybeUninit<T>; N] {
+            // SAFETY: An uninitialized `[MaybeUninit<_>; N]` is valid.
+            unsafe { MaybeUninit::<[MaybeUninit<T>; N]>::uninit().assume_init() }
+        }
+
+        unsafe fn assume_init_arr<T, const N: usize>(arr: [MaybeUninit<T>; N]) -> [T; N] {
+            core::mem::transmute_copy(&arr)
+        }
+
+        let mut cur_i = base.clone();
+        let mut cur_e_uninit: [MaybeUninit<I::Item>; N] = uninit_array();
+        for (e, i) in cur_e_uninit.iter_mut().zip(cur_i.iter_mut()) {
+            unsafe {
+                e.as_mut_ptr()
+                    .write(i.next().expect("iterator must return at least one element"))
+            };
+        }
+
+        let cur_e = unsafe { assume_init_arr(cur_e_uninit) };
+
+        CartesianProduct {
+            first: true,
+            base,
+            cur_i,
+            cur_e,
+        }
+    }
+}
+
+impl<I, const N: usize> Iterator for CartesianProduct<I, N>
+where
+    I: Iterator + Clone,
+    I::Item: Clone,
+{
+    type Item = [I::Item; N];
+
+    fn next(&mut self) -> Option<[I::Item; N]> {
+        if self.first {
+            self.first = false;
+            return Some(self.cur_e.clone());
+        }
+
+        let mut could_iter = false;
+        for i in (0..N).rev() {
+            if let Some(e) = self.cur_i[i].next() {
+                self.cur_e[i] = e;
+                could_iter = true;
+                break;
+            } else {
+                for j in i..N {
+                    self.cur_i[j] = self.base[j].clone();
+                    self.cur_e[j] = self.cur_i[j].next().unwrap();
+                }
+            }
+        }
+
+        if !could_iter {
+            return None;
+        }
+
+        Some(self.cur_e.clone())
     }
 }
 

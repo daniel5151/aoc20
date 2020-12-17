@@ -4,6 +4,7 @@
 name = "aoc20"
 version = "0.1.0"
 dependencies = [
+ "iter_to_array",
  "itertools",
  "num-traits",
 ]
@@ -19,6 +20,11 @@ name = "either"
 version = "1.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb1f6b1ce1c140482ea30ddd3335fc0024ac7ee112895426e0a629a6c20adfe3"
+
+[[package]]
+name = "iter_to_array"
+version = "0.1.0"
+source = "git+https://github.com/yyogo/iter_to_array.git?branch=main#726414759ca32cbac88eb6585d16ba53fc0cdf06"
 
 [[package]]
 name = "itertools"

@@ -11,6 +11,9 @@ default = []
 itertools = "0.9"
 num-traits = "0.2.14"
 
+# too lazy to rewrite this in-tree
+iter_to_array = { git = "https://github.com/yyogo/iter_to_array.git", branch = "main" }
+
 [profile.dev]
 codegen-units = 4
 incremental = true
