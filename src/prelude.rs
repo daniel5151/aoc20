@@ -13,8 +13,6 @@ pub use itertools::{Itertools, MinMaxResult};
 
 pub use crate::DynResult;
 
-pub use crate::vm;
-
 pub trait GcdLcm: Sized + num_traits::PrimInt {
     /// Find the Greatest Common Divisor between two numbers
     fn gcd(self, other: Self) -> Self {
