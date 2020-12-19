@@ -13,7 +13,7 @@ macro_rules! munge_input {
 pub fn first_invalid(nums: &[usize], preamble: usize) -> DynResult<usize> {
     'outer: for g in nums.windows(preamble + 1) {
         let n = *g.last().ok_or("nums cannot be empty")?;
-        for combo in g.combinations_const::<2>() {
+        for combo in g.combinations::<2>() {
             if combo.into_iter().sum::<usize>() == n {
                 continue 'outer;
             }

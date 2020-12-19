@@ -11,7 +11,7 @@ macro_rules! munge_input {
 }
 
 fn find<const GROUP_SIZE: usize>(nums: &[usize], sum: usize) -> Option<usize> {
-    for v in nums.combinations_const::<GROUP_SIZE>() {
+    for v in nums.combinations::<GROUP_SIZE>() {
         if v.into_iter().sum::<usize>() == sum {
             return Some(v.iter().copied().product());
         }

@@ -27,7 +27,9 @@ fn solve<const DIMS: usize>(input: HashSet<(isize, isize)>, iters: usize) -> usi
         .collect::<HashSet<_>>();
     let mut next = HashSet::new();
 
-    let deltas = CartesianProduct::new([-1..=1; DIMS]).filter(|c| *c != [0; DIMS]);
+    let deltas = [-1..=1; DIMS]
+        .cartesian_product()
+        .filter(|c| *c != [0; DIMS]);
 
     for _ in 0..iters {
         // calculate bounds
@@ -44,7 +46,7 @@ fn solve<const DIMS: usize>(input: HashSet<(isize, isize)>, iters: usize) -> usi
             .take_array() // uses the `iter_to_array` crate
             .unwrap();
 
-        for cord in CartesianProduct::new(bounds) {
+        for cord in bounds.cartesian_product() {
             let neighbors = deltas
                 .clone()
                 .filter(|deltas| {

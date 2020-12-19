@@ -7,6 +7,7 @@
 )]
 
 pub mod prelude;
+pub mod util;
 
 /// Catch-all error type (works with anything that implements std::error::Error)
 pub type DynResult<T> = Result<T, Box<dyn std::error::Error>>;
