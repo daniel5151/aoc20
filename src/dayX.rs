@@ -27,10 +27,10 @@ pub fn q2(input: &str, _args: &[&str]) -> DynResult<usize> {
 mod tests {
     use super::*;
 
-    const EXAMPLE_1: &str = "
+    const EXAMPLE_1: &str = r#"
 .....dummy.....
 .....input.....
-";
+"#;
 
     #[test]
     fn q1_e1() {

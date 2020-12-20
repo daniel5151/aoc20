@@ -26,3 +26,14 @@ pub mod aoc {
         s.finish()
     }
 }
+
+/// More compact than the default `{:#?}` output, while still printing each
+/// (k, v) on a new line.
+#[macro_export]
+macro_rules! dbg_map {
+    ($map:expr) => {
+        for (k, v) in $map.iter().sorted_by(|(k1, _), (k2, _)| k1.cmp(k2)) {
+            eprintln!("{:?}: {:?}", k, v);
+        }
+    };
+}

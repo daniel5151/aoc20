@@ -51,3 +51,17 @@ Getting this cookie is fairly straightforward:
     - the string should include a `-H 'cookie: <cookie.txt>'` component.
 
 Alternatively, you can just invoke `cargo run --release -- <day> <question>` manually, though it will not automatically download input data.
+
+## Q: Why use a macro to parse input?
+
+Speed!
+
+If I'd used a function, I'd have to explicitly specify the return type (e.g
+`HashMap<usize, Vec<(usize, usize)>>` or what have you).
+
+> Okay, so why not just use a closure then? That'll infer the types for you!
+
+Yeah, sure, but then error handling would be more annoying, since the return
+value would have to be wrapped with `Ok()`.
+
+So yeah, it's a bit weird, but there is a method to the madness.

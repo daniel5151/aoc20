@@ -6,6 +6,7 @@
     const_in_array_repeat_expressions
 )]
 
+#[macro_use]
 pub mod prelude;
 pub mod util;
 
@@ -53,6 +54,7 @@ days! {
     day16,
     day17,
     day18,
+    day19,
 }
 
 fn main() -> DynResult<()> {
