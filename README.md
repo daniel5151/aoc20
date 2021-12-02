@@ -2,6 +2,8 @@
 
 My solutions to Advent of Code 2020.
 
+- Last year: <https://github.com/daniel5151/aoc19>
+
 Some goals:
 
 - Solve the questions (duh)
